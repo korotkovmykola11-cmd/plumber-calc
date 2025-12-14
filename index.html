@@ -3,9 +3,73 @@
 <head>
   <meta charset="UTF-8" />
   <title>Plumber Calculator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      padding: 20px;
+    }
+    .calc {
+      max-width: 400px;
+      margin: auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.1);
+    }
+    h1 {
+      text-align: center;
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+    }
+    input {
+      width: 100%;
+      padding: 8px;
+      margin-top: 4px;
+    }
+    button {
+      margin-top: 15px;
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+    }
+    .result {
+      margin-top: 15px;
+      font-weight: bold;
+      text-align: center;
+    }
+  </style>
 </head>
 <body>
-  <h1>Plumber Calculator</h1>
-  <p>It works.</p>
+
+  <div class="calc">
+    <h1>Plumber Calculator</h1>
+
+    <label>
+      Hours worked
+      <input type="number" id="hours" />
+    </label>
+
+    <label>
+      Price per hour
+      <input type="number" id="rate" />
+    </label>
+
+    <button onclick="calc()">Calculate</button>
+
+    <div class="result" id="result"></div>
+  </div>
+
+  <script>
+    function calc() {
+      const h = Number(document.getElementById('hours').value);
+      const r = Number(document.getElementById('rate').value);
+      document.getElementById('result').textContent =
+        'Total: ' + (h * r);
+    }
+  </script>
+
 </body>
 </html>
