@@ -1,290 +1,571 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="ltr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Plumber Calculator</title>
+
   <style>
     * { box-sizing: border-box; }
-
     body{
       margin:0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-      background:#f4f6f8;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+      background: linear-gradient(135deg,#e6f0ff,#f4f6f8);
       padding:18px;
       color:#111;
     }
-
-    .calc{
-      max-width:520px;
+    .wrap{
+      max-width:560px;
       margin:0 auto;
+      position:relative;
+    }
+    .card{
       background:#fff;
-      padding:22px 18px;
-      border-radius:14px;
+      border-radius:16px;
       box-shadow:0 10px 30px rgba(0,0,0,.08);
+      padding:18px 16px 16px;
+      position:relative;
+      overflow:hidden;
+    }
+
+    /* plumber background (SVG) */
+    .plumber-bg{
+      position:absolute;
+      right:-10px;
+      bottom:-18px;
+      width:210px;
+      opacity:.10;
+      pointer-events:none;
+      transform: rotate(-6deg);
     }
 
     h1{
-      margin:4px 0 6px;
       text-align:center;
-      font-size:38px;
-      line-height:1.05;
-      letter-spacing:-.5px;
+      margin:6px 0 4px;
+      font-size:34px;
+      letter-spacing:.2px;
+    }
+    .subtitle{
+      text-align:center;
+      color:#666;
+      margin:0 0 12px;
+      font-size:14px;
     }
 
-    .sub{
-      text-align:center;
-      margin:0 0 18px;
-      color:#667085;
-      font-size:14px;
+    .topbar{
+      display:flex;
+      gap:10px;
+      justify-content:space-between;
+      align-items:center;
+      flex-wrap:wrap;
+      margin-bottom:12px;
+    }
+
+    .lang{
+      display:flex;
+      gap:8px;
+      align-items:center;
+    }
+    .lang button{
+      border:1px solid #cfcfcf;
+      background:#f7f7f7;
+      padding:8px 10px;
+      border-radius:10px;
+      font-weight:600;
+      cursor:pointer;
+    }
+    .lang button.active{
+      background:#111;
+      color:#fff;
+      border-color:#111;
     }
 
     .row{
       display:grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns:1fr 1fr;
       gap:12px;
+    }
+    @media (max-width:520px){
+      .row{ grid-template-columns:1fr; }
+      h1{ font-size:32px; }
     }
 
     label{
       display:block;
       font-weight:700;
-      margin:14px 0 6px;
+      margin:10px 0 6px;
+    }
+    .hint{
+      font-size:12px;
+      color:#777;
+      margin-top:4px;
     }
 
-    input, select{
+    select, input{
       width:100%;
       padding:12px 12px;
-      border:1px solid #d0d7de;
-      border-radius:10px;
+      border:1px solid #d7d7d7;
+      border-radius:12px;
       font-size:16px;
       outline:none;
       background:#fff;
     }
-
-    input::placeholder{ color:#9aa4b2; }
-
     input:focus, select:focus{
-      border-color:#4c9ffe;
-      box-shadow:0 0 0 3px rgba(76,159,254,.18);
+      border-color:#2d6cdf;
+      box-shadow:0 0 0 4px rgba(45,108,223,.12);
     }
 
+    .actions{
+      display:flex;
+      gap:10px;
+      margin-top:14px;
+    }
     .btn{
-      margin-top:16px;
       width:100%;
-      border:none;
-      border-radius:12px;
-      padding:14px 14px;
-      font-size:18px;
-      font-weight:700;
+      padding:14px 12px;
+      border-radius:14px;
+      border:0;
+      font-size:17px;
+      font-weight:800;
       cursor:pointer;
     }
-
-    .btn-primary{
+    .btn.primary{
       background:#1677ff;
       color:#fff;
     }
-    .btn-primary:active{ transform: translateY(1px); }
-
-    .btn-secondary{
-      background:#eef2f6;
+    .btn.secondary{
+      background:#f0f0f0;
       color:#111;
-      border:1px solid #d0d7de;
-      margin-top:10px;
-    }
-    .btn-secondary:active{ transform: translateY(1px); }
-
-    .tip{
-      margin-top:12px;
-      color:#667085;
-      font-size:13px;
-      text-align:left;
     }
 
-    .resultCard{
+    .result{
+      margin-top:14px;
+      border:1px solid #e6e6e6;
+      border-radius:14px;
+      padding:14px 14px;
+      background:#fbfdff;
       display:none;
-      margin-top:16px;
-      border:1px solid #d0d7de;
-      border-radius:12px;
-      padding:14px;
-      background:#f8fafc;
     }
-
-    .resultRow{
+    .resline{
       display:flex;
       justify-content:space-between;
-      padding:8px 0;
-      border-bottom:1px solid rgba(0,0,0,.06);
-      font-size:15px;
+      gap:10px;
+      padding:6px 0;
+      border-bottom:1px dashed #e3e3e3;
     }
-    .resultRow:last-child{ border-bottom:none; }
-
-    .resultTitle{
-      color:#667085;
-      font-weight:700;
-    }
-
+    .resline:last-child{ border-bottom:0; }
     .total{
-      margin-top:10px;
-      display:flex;
-      justify-content:space-between;
-      align-items:baseline;
-      font-size:18px;
-      font-weight:800;
+      font-size:22px;
+      font-weight:900;
+      padding-top:10px;
     }
-    .total span:first-child{ color:#111; }
-    .total span:last-child{ font-size:22px; }
+    .muted{ color:#666; }
 
-    .muted{
-      color:#667085;
-      font-weight:700;
+    /* RTL support */
+    html[dir="rtl"] body{ direction:rtl; }
+    html[dir="rtl"] .resline{ flex-direction:row-reverse; }
+    html[dir="rtl"] .topbar{ flex-direction:row-reverse; }
+    html[dir="rtl"] .actions{ flex-direction:row-reverse; }
+
+    .footer-tip{
+      margin-top:10px;
+      color:#777;
+      font-size:12px;
+      text-align:center;
     }
   </style>
 </head>
 
 <body>
-  <div class="calc">
-    <h1>Plumber Calculator</h1>
-    <p class="sub">Quick estimate: materials + fittings + labor</p>
+  <div class="wrap">
+    <div class="card">
+      <!-- plumber SVG background -->
+      <svg class="plumber-bg" viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <!-- head -->
+        <circle cx="120" cy="70" r="36" fill="#111"/>
+        <circle cx="108" cy="64" r="5" fill="#fff"/>
+        <circle cx="132" cy="64" r="5" fill="#fff"/>
+        <path d="M104 82 Q120 96 136 82" stroke="#fff" stroke-width="6" fill="none" stroke-linecap="round"/>
+        <!-- hat -->
+        <path d="M78 60 Q120 20 162 60" fill="#111"/>
+        <rect x="78" y="58" width="84" height="14" rx="7" fill="#111"/>
+        <!-- body -->
+        <rect x="78" y="108" width="84" height="76" rx="18" fill="#111"/>
+        <!-- wrench -->
+        <path d="M176 120 l30 -18 10 16 -30 18 z" fill="#111"/>
+        <circle cx="205" cy="108" r="10" fill="none" stroke="#111" stroke-width="8"/>
+        <rect x="150" y="128" width="70" height="12" rx="6" fill="#111"/>
+      </svg>
 
-    <div class="row">
-      <div>
-        <label for="currency">Currency</label>
-        <select id="currency">
-          <option value="AED">AED</option>
-          <option value="USD">USD</option>
-          <option value="EUR">EUR</option>
-        </select>
+      <h1 id="t_title">Plumber Calculator</h1>
+      <div class="subtitle" id="t_subtitle">Quick estimate: materials + fittings + labor</div>
+
+      <div class="topbar">
+        <div class="lang" aria-label="Language">
+          <button type="button" id="btn_en" class="active">EN</button>
+          <button type="button" id="btn_ru">RU</button>
+          <button type="button" id="btn_ar">AR</button>
+        </div>
+
+        <div style="min-width:220px;flex:1;">
+          <label id="t_currency_lbl" for="currency" style="margin:0 0 6px;">Currency</label>
+          <select id="currency">
+            <option value="AED" selected>AED</option>
+            <option value="USD">USD</option>
+            <option value="EUR">EUR</option>
+            <option value="RUB">RUB</option>
+          </select>
+        </div>
       </div>
 
-      <div>
-        <label for="diameter">Pipe diameter</label>
-        <select id="diameter">
-          <option value="16">16 mm</option>
-          <option value="20">20 mm</option>
-          <option value="25">25 mm</option>
-          <option value="32">32 mm</option>
-          <option value="40">40 mm</option>
-        </select>
-      </div>
-    </div>
+      <div class="row">
+        <div>
+          <label id="t_diam_lbl" for="diameter">Pipe diameter</label>
+          <select id="diameter">
+            <option value="16" selected>16 mm</option>
+            <option value="20">20 mm</option>
+            <option value="25">25 mm</option>
+            <option value="32">32 mm</option>
+          </select>
+        </div>
 
-    <label for="length">Pipe length (meters)</label>
-    <input id="length" type="number" inputmode="decimal" placeholder="e.g. 12.5" step="any" min="0"/>
+        <div>
+          <label id="t_len_lbl" for="length">Pipe length (meters)</label>
+          <input id="length" inputmode="decimal" placeholder="e.g. 12.5" />
+        </div>
 
-    <label for="pipePrice">Pipe price per meter</label>
-    <input id="pipePrice" type="number" inputmode="decimal" placeholder="e.g. 8.50" step="any" min="0"/>
+        <div>
+          <label id="t_pipeprice_lbl" for="pipePrice">Pipe price per meter</label>
+          <input id="pipePrice" inputmode="decimal" placeholder="e.g. 8.50" />
+        </div>
 
-    <div class="row">
-      <div>
-        <label for="fittingsCount">Fittings count</label>
-        <input id="fittingsCount" type="number" inputmode="numeric" placeholder="e.g. 6" step="1" min="0"/>
-      </div>
-      <div>
-        <label for="fittingPrice">Fitting price (each)</label>
-        <input id="fittingPrice" type="number" inputmode="decimal" placeholder="e.g. 3.00" step="any" min="0"/>
-      </div>
-    </div>
+        <div>
+          <label id="t_fitcount_lbl" for="fittingsCount">Fittings count</label>
+          <input id="fittingsCount" inputmode="decimal" placeholder="e.g. 6" />
+        </div>
 
-    <div class="row">
-      <div>
-        <label for="laborHours">Labor hours</label>
-        <input id="laborHours" type="number" inputmode="decimal" placeholder="e.g. 2.5" step="any" min="0"/>
-      </div>
-      <div>
-        <label for="laborRate">Labor rate (per hour)</label>
-        <input id="laborRate" type="number" inputmode="decimal" placeholder="e.g. 60" step="any" min="0"/>
-      </div>
-    </div>
+        <div>
+          <label id="t_fitprice_lbl" for="fittingPrice">Fitting price (each)</label>
+          <input id="fittingPrice" inputmode="decimal" placeholder="e.g. 3.00" />
+        </div>
 
-    <button class="btn btn-primary" id="calcBtn" type="button">Calculate</button>
-    <button class="btn btn-secondary" id="resetBtn" type="button">Reset</button>
+        <div>
+          <label id="t_laborrate_lbl" for="laborRate">Labor rate (per hour)</label>
+          <input id="laborRate" inputmode="decimal" placeholder="e.g. 60" />
+        </div>
 
-    <div class="resultCard" id="resultCard" aria-live="polite">
-      <div class="resultRow">
-        <div class="resultTitle">Diameter</div>
-        <div><span id="outDiameter"></span></div>
-      </div>
+        <div>
+          <label id="t_laborhours_lbl" for="laborHours">Labor hours</label>
+          <input id="laborHours" inputmode="decimal" placeholder="e.g. 2.5" />
+          <div class="hint" id="t_autohint">If empty → auto-calc: length ÷ 10</div>
+        </div>
 
-      <div class="resultRow">
-        <div class="resultTitle">Pipe</div>
-        <div><span id="outPipe"></span></div>
-      </div>
+        <div>
+          <label id="t_discount_lbl" for="discount">Discount (%)</label>
+          <input id="discount" inputmode="decimal" placeholder="e.g. 5" />
+        </div>
 
-      <div class="resultRow">
-        <div class="resultTitle">Fittings</div>
-        <div><span id="outFittings"></span></div>
-      </div>
+        <div>
+          <label id="t_surcharge_lbl" for="surcharge">Fittings surcharge (if count ≥ 12) (%)</label>
+          <input id="surcharge" inputmode="decimal" placeholder="e.g. 10" />
+          <div class="hint" id="t_surchargehint">Applied only when fittings count is 12 or more</div>
+        </div>
 
-      <div class="resultRow">
-        <div class="resultTitle">Labor</div>
-        <div><span id="outLabor"></span></div>
+        <div>
+          <label id="t_markup_lbl" for="markup">Markup (%)</label>
+          <input id="markup" inputmode="decimal" placeholder="e.g. 15" />
+        </div>
       </div>
 
-      <div class="total">
-        <span>Total</span>
-        <span id="outTotal"></span>
+      <div class="actions">
+        <button class="btn primary" id="btnCalc" type="button">Calculate</button>
+        <button class="btn secondary" id="btnReset" type="button">Reset</button>
       </div>
-    </div>
 
-    <div class="tip">
-      Tip: fill only what you know — empty fields are treated as 0.
+      <div class="result" id="resultCard">
+        <div class="resline">
+          <div class="muted" id="t_out_diam">Diameter</div>
+          <div id="outDiameter">—</div>
+        </div>
+
+        <div class="resline">
+          <div class="muted" id="t_out_pipe">Pipe</div>
+          <div id="outPipe">—</div>
+        </div>
+
+        <div class="resline">
+          <div class="muted" id="t_out_fit">Fittings</div>
+          <div id="outFittings">—</div>
+        </div>
+
+        <div class="resline">
+          <div class="muted" id="t_out_labor">Labor</div>
+          <div id="outLabor">—</div>
+        </div>
+
+        <div class="resline" id="rowAdjust" style="display:none;">
+          <div class="muted" id="t_out_adjust">Adjustments</div>
+          <div id="outAdjust">—</div>
+        </div>
+
+        <div class="resline total">
+          <div id="t_out_total">Total</div>
+          <div id="outTotal">—</div>
+        </div>
+      </div>
+
+      <div class="footer-tip" id="t_tip">Tip: fill only what you know — empty fields are treated as 0.</div>
     </div>
   </div>
 
   <script>
-    const $ = (id) => document.getElementById(id);
+    // ---------- i18n ----------
+    const I18N = {
+      en: {
+        title: "Plumber Calculator",
+        subtitle: "Quick estimate: materials + fittings + labor",
+        currency: "Currency",
+        diam: "Pipe diameter",
+        len: "Pipe length (meters)",
+        pipePrice: "Pipe price per meter",
+        fitCount: "Fittings count",
+        fitPrice: "Fitting price (each)",
+        laborRate: "Labor rate (per hour)",
+        laborHours: "Labor hours",
+        autoHint: "If empty → auto-calc: length ÷ 10",
+        discount: "Discount (%)",
+        surcharge: "Fittings surcharge (if count ≥ 12) (%)",
+        surchargeHint: "Applied only when fittings count is 12 or more",
+        markup: "Markup (%)",
+        calc: "Calculate",
+        reset: "Reset",
+        outDiam: "Diameter",
+        outPipe: "Pipe",
+        outFit: "Fittings",
+        outLabor: "Labor",
+        outAdjust: "Adjustments",
+        outTotal: "Total",
+        tip: "Tip: fill only what you know — empty fields are treated as 0."
+      },
+      ru: {
+        title: "Калькулятор сантехника",
+        subtitle: "Быстрый расчёт: материалы + фитинги + работа",
+        currency: "Валюта",
+        diam: "Диаметр трубы",
+        len: "Длина трубы (метры)",
+        pipePrice: "Цена трубы за метр",
+        fitCount: "Количество фитингов",
+        fitPrice: "Цена фитинга (шт.)",
+        laborRate: "Ставка за час",
+        laborHours: "Часы работы",
+        autoHint: "Если пусто → авторасчёт: длина ÷ 10",
+        discount: "Скидка (%)",
+        surcharge: "Наценка за фитинги (если ≥ 12) (%)",
+        surchargeHint: "Применяется только если фитингов 12 или больше",
+        markup: "Наценка (%)",
+        calc: "Рассчитать",
+        reset: "Сброс",
+        outDiam: "Диаметр",
+        outPipe: "Труба",
+        outFit: "Фитинги",
+        outLabor: "Работа",
+        outAdjust: "Коррекции",
+        outTotal: "Итого",
+        tip: "Подсказка: заполняй только то, что знаешь — пустые поля считаются 0."
+      },
+      ar: {
+        title: "حاسبة السباك",
+        subtitle: "تقدير سريع: مواد + وصلات + أجور",
+        currency: "العملة",
+        diam: "قطر الأنبوب",
+        len: "طول الأنبوب (متر)",
+        pipePrice: "سعر الأنبوب لكل متر",
+        fitCount: "عدد الوصلات",
+        fitPrice: "سعر الوصلة (للواحدة)",
+        laborRate: "أجرة الساعة",
+        laborHours: "ساعات العمل",
+        autoHint: "إذا كان فارغاً → حساب تلقائي: الطول ÷ 10",
+        discount: "الخصم (%)",
+        surcharge: "زيادة الوصلات (إذا العدد ≥ 12) (%)",
+        surchargeHint: "تُطبَّق فقط عندما يكون عدد الوصلات 12 أو أكثر",
+        markup: "هامش الربح (%)",
+        calc: "احسب",
+        reset: "إعادة ضبط",
+        outDiam: "القطر",
+        outPipe: "الأنبوب",
+        outFit: "الوصلات",
+        outLabor: "العمل",
+        outAdjust: "التعديلات",
+        outTotal: "الإجمالي",
+        tip: "ملاحظة: املأ ما تعرفه فقط — الحقول الفارغة تُحسب 0."
+      }
+    };
 
-    function n(v){
-      // пусто -> 0, запятая -> точка
-      const s = String(v ?? "").trim().replace(",", ".");
+    let lang = "en";
+
+    function setLang(next){
+      lang = next;
+      const t = I18N[lang];
+
+      document.documentElement.lang = lang;
+      document.documentElement.dir = (lang === "ar") ? "rtl" : "ltr";
+
+      // buttons
+      document.getElementById("btn_en").classList.toggle("active", lang==="en");
+      document.getElementById("btn_ru").classList.toggle("active", lang==="ru");
+      document.getElementById("btn_ar").classList.toggle("active", lang==="ar");
+
+      // text
+      document.getElementById("t_title").textContent = t.title;
+      document.getElementById("t_subtitle").textContent = t.subtitle;
+      document.getElementById("t_currency_lbl").textContent = t.currency;
+
+      document.getElementById("t_diam_lbl").textContent = t.diam;
+      document.getElementById("t_len_lbl").textContent = t.len;
+      document.getElementById("t_pipeprice_lbl").textContent = t.pipePrice;
+      document.getElementById("t_fitcount_lbl").textContent = t.fitCount;
+      document.getElementById("t_fitprice_lbl").textContent = t.fitPrice;
+      document.getElementById("t_laborrate_lbl").textContent = t.laborRate;
+      document.getElementById("t_laborhours_lbl").textContent = t.laborHours;
+      document.getElementById("t_autohint").textContent = t.autoHint;
+      document.getElementById("t_discount_lbl").textContent = t.discount;
+      document.getElementById("t_surcharge_lbl").textContent = t.surcharge;
+      document.getElementById("t_surchargehint").textContent = t.surchargeHint;
+      document.getElementById("t_markup_lbl").textContent = t.markup;
+
+      document.getElementById("btnCalc").textContent = t.calc;
+      document.getElementById("btnReset").textContent = t.reset;
+
+      document.getElementById("t_out_diam").textContent = t.outDiam;
+      document.getElementById("t_out_pipe").textContent = t.outPipe;
+      document.getElementById("t_out_fit").textContent = t.outFit;
+      document.getElementById("t_out_labor").textContent = t.outLabor;
+      document.getElementById("t_out_adjust").textContent = t.outAdjust;
+      document.getElementById("t_out_total").textContent = t.outTotal;
+      document.getElementById("t_tip").textContent = t.tip;
+    }
+
+    // ---------- parsing / formatting ----------
+    function num(v){
+      if (v == null) return 0;
+      const s = String(v).trim().replace(",", ".");
       const x = parseFloat(s);
       return Number.isFinite(x) ? x : 0;
     }
 
-    function money(value, cur){
-      return value.toFixed(2) + " " + cur;
+    function localeFor(lang){
+      if (lang === "ru") return "ru-RU";
+      if (lang === "ar") return "ar-AE";
+      return "en-US";
     }
 
-    $("calcBtn").addEventListener("click", () => {
-      const cur = $("currency").value;
-      const diameter = $("diameter").value;
+    function money(amount, currency){
+      const loc = localeFor(lang);
+      try{
+        return new Intl.NumberFormat(loc, {
+          style: "currency",
+          currency,
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        }).format(amount);
+      }catch(e){
+        // fallback
+        return amount.toFixed(2) + " " + currency;
+      }
+    }
 
-      const length = n($("length").value);
-      const pipePrice = n($("pipePrice").value);
+    function formatNumber(n){
+      const loc = localeFor(lang);
+      return new Intl.NumberFormat(loc, { maximumFractionDigits: 2 }).format(n);
+    }
 
-      const fittingsCount = n($("fittingsCount").value);
-      const fittingPrice = n($("fittingPrice").value);
+    // ---------- logic ----------
+    function calculate(){
+      const currency = document.getElementById("currency").value;
+      const diameter = document.getElementById("diameter").value;
 
-      const laborHours = n($("laborHours").value);
-      const laborRate = n($("laborRate").value);
+      const length = num(document.getElementById("length").value);
+      const pipePrice = num(document.getElementById("pipePrice").value);
+
+      const fittingsCount = num(document.getElementById("fittingsCount").value);
+      const fittingPrice = num(document.getElementById("fittingPrice").value);
+
+      const laborRate = num(document.getElementById("laborRate").value);
+      let laborHours = num(document.getElementById("laborHours").value);
+
+      const discountPct = num(document.getElementById("discount").value);
+      const surchargePct = num(document.getElementById("surcharge").value);
+      const markupPct = num(document.getElementById("markup").value);
+
+      // auto labor hours if empty/0 but length exists
+      const laborHoursRaw = String(document.getElementById("laborHours").value || "").trim();
+      if ((laborHoursRaw === "" || laborHours === 0) && length > 0){
+        laborHours = length / 10; // simple heuristic
+      }
 
       const pipeCost = length * pipePrice;
-      const fittingsCost = fittingsCount * fittingPrice;
+      const fittingsBase = fittingsCount * fittingPrice;
+
+      // surcharge only if fittings >= 12
+      const surcharge = (fittingsCount >= 12) ? (fittingsBase * (surchargePct/100)) : 0;
+
       const laborCost = laborHours * laborRate;
-      const total = pipeCost + fittingsCost + laborCost;
 
-      $("outDiameter").textContent = `${diameter} mm`;
-      $("outPipe").textContent = money(pipeCost, cur);
-      $("outFittings").textContent = money(fittingsCost, cur);
-      $("outLabor").textContent = money(laborCost, cur);
-      $("outTotal").textContent = money(total, cur);
+      // subtotal
+      let subtotal = pipeCost + fittingsBase + surcharge + laborCost;
 
-      $("resultCard").style.display = "block";
-      $("resultCard").scrollIntoView({ behavior: "smooth", block: "nearest" });
-    });
+      // markup
+      const markup = subtotal * (markupPct/100);
+      subtotal += markup;
 
-    $("resetBtn").addEventListener("click", () => {
-      document.querySelectorAll("input").forEach(i => i.value = "");
-      $("currency").selectedIndex = 0;
-      $("diameter").selectedIndex = 0;
+      // discount
+      const discount = subtotal * (discountPct/100);
+      const total = subtotal - discount;
 
-      $("resultCard").style.display = "none";
-      $("outDiameter").textContent = "";
-      $("outPipe").textContent = "";
-      $("outFittings").textContent = "";
-      $("outLabor").textContent = "";
-      $("outTotal").textContent = "";
-    });
+      // output
+      document.getElementById("outDiameter").textContent = formatNumber(Number(diameter)) + " mm";
+      document.getElementById("outPipe").textContent = money(pipeCost, currency);
+      document.getElementById("outFittings").textContent = money(fittingsBase + surcharge, currency);
+      document.getElementById("outLabor").textContent = money(laborCost, currency);
+
+      // adjustments line (markup/discount/surcharge breakdown)
+      const adjParts = [];
+      if (surcharge > 0) adjParts.push((lang==="ar" ? "زيادة الوصلات" : lang==="ru" ? "Наценка за фитинги" : "Fittings surcharge") + ": " + money(surcharge, currency));
+      if (markup > 0) adjParts.push((lang==="ar" ? "هامش" : lang==="ru" ? "Наценка" : "Markup") + ": " + money(markup, currency));
+      if (discount > 0) adjParts.push((lang==="ar" ? "خصم" : lang==="ru" ? "Скидка" : "Discount") + ": -" + money(discount, currency));
+
+      const rowAdjust = document.getElementById("rowAdjust");
+      if (adjParts.length){
+        rowAdjust.style.display = "flex";
+        document.getElementById("outAdjust").textContent = adjParts.join(" • ");
+      } else {
+        rowAdjust.style.display = "none";
+      }
+
+      document.getElementById("outTotal").textContent = money(total, currency);
+
+      const card = document.getElementById("resultCard");
+      card.style.display = "block";
+      card.scrollIntoView({behavior:"smooth", block:"nearest"});
+    }
+
+    function resetAll(){
+      const ids = ["length","pipePrice","fittingsCount","fittingPrice","laborRate","laborHours","discount","surcharge","markup"];
+      ids.forEach(id => document.getElementById(id).value = "");
+      document.getElementById("diameter").value = "16";
+      document.getElementById("currency").value = "AED";
+      document.getElementById("resultCard").style.display = "none";
+    }
+
+    // ---------- init ----------
+    document.getElementById("btn_en").addEventListener("click", ()=>setLang("en"));
+    document.getElementById("btn_ru").addEventListener("click", ()=>setLang("ru"));
+    document.getElementById("btn_ar").addEventListener("click", ()=>setLang("ar"));
+
+    document.getElementById("btnCalc").addEventListener("click", calculate);
+    document.getElementById("btnReset").addEventListener("click", resetAll);
+
+    setLang("en");
   </script>
 </body>
 </html>
