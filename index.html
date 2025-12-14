@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Plumber Calculator</title>
   <style>
     body {
@@ -10,66 +11,167 @@
       padding: 20px;
     }
     .calc {
-      max-width: 400px;
-      margin: auto;
+      max-width: 520px;
+      margin: 0 auto;
       background: #fff;
       padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,.1);
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,.1);
     }
-    h1 {
-      text-align: center;
-    }
-    label {
-      display: block;
-      margin-top: 10px;
-    }
-    input {
-      width: 100%;
-      padding: 8px;
-      margin-top: 4px;
-    }
-    button {
-      margin-top: 15px;
+    h1 { text-align: center; margin: 0 0 12px; }
+    .sub { text-align: center; color: #667; margin: 0 0 16px; font-size: 14px; }
+    label { display: block; margin-top: 12px; font-weight: 600; }
+    input, select {
       width: 100%;
       padding: 10px;
+      margin-top: 6px;
+      border: 1px solid #d6dbe0;
+      border-radius: 8px;
       font-size: 16px;
+      box-sizing: border-box;
     }
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    button {
+      margin-top: 16px;
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      border: 0;
+      border-radius: 10px;
+      background: #0a7cff;
+      color: white;
+      font-weight: 700;
+    }
+    button:active { transform: scale(0.99); }
     .result {
-      margin-top: 15px;
-      font-weight: bold;
-      text-align: center;
+      margin-top: 16px;
+      background: #f7fbff;
+      border: 1px solid #d7ebff;
+      border-radius: 10px;
+      padding: 12px;
+      line-height: 1.5;
+      font-size: 15px;
     }
+    .muted { color: #667; font-size: 13px; margin-top: 10px; }
+    .line { display:flex; justify-content: space-between; gap: 10px; }
+    .line b { white-space: nowrap; }
+    .total { font-size: 18px; margin-top: 8px; }
+    .warn { color: #b45309; font-weight: 700; margin-top: 10px; }
   </style>
 </head>
 <body>
-
   <div class="calc">
     <h1>Plumber Calculator</h1>
+    <p class="sub">Quick estimate: materials + fittings + labor</p>
 
-    <label>
-      Hours worked
-      <input type="number" id="hours" />
-    </label>
+    <div class="row">
+      <div>
+        <label>Currency</label>
+        <select id="currency">
+          <option value="AED">AED</option>
+          <option value="USD">USD</option>
+          <option value="EUR">EUR</option>
+        </select>
+      </div>
+      <div>
+        <label>Pipe diameter</label>
+        <select id="diameter">
+          <option value="16">16 mm</option>
+          <option value="20">20 mm</option>
+          <option value="25">25 mm</option>
+          <option value="32">32 mm</option>
+          <option value="40">40 mm</option>
+          <option value="50">50 mm</option>
+        </select>
+      </div>
+    </div>
 
-    <label>
-      Price per hour
-      <input type="number" id="rate" />
-    </label>
+    <label>Pipe length (meters)</label>
+    <input id="length" type="number" inputmode="decimal" min="0" step="0.1" placeholder="e.g. 12.5" />
 
-    <button onclick="calc()">Calculate</button>
+    <label>Pipe price per meter</label>
+    <input id="pricePerM" type="number" inputmode="decimal" min="0" step="0.01" placeholder="e.g. 8.50" />
 
-    <div class="result" id="result"></div>
+    <div class="row">
+      <div>
+        <label>Fittings count</label>
+        <input id="fittingsCount" type="number" inputmode="numeric" min="0" step="1" placeholder="e.g. 6" />
+      </div>
+      <div>
+        <label>Fitting price (each)</label>
+        <input id="fittingPrice" type="number" inputmode="decimal" min="0" step="0.01" placeholder="e.g. 3.00" />
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <label>Labor hours</label>
+        <input id="hours" type="number" inputmode="decimal" min="0" step="0.25" placeholder="e.g. 2.5" />
+      </div>
+      <div>
+        <label>Labor rate (per hour)</label>
+        <input id="rate" type="number" inputmode="decimal" min="0" step="0.01" placeholder="e.g. 60" />
+      </div>
+    </div>
+
+    <button id="btn">Calculate</button>
+
+    <div id="out" class="result" style="display:none;"></div>
+    <div class="muted">Tip: fill only what you know — empty fields are treated as 0.</div>
   </div>
 
   <script>
-    function calc() {
-      const h = Number(document.getElementById('hours').value);
-      const r = Number(document.getElementById('rate').value);
-      document.getElementById('result').textContent =
-        'Total: ' + (h * r);
-    }
-  </script>
+    const $ = (id) => document.getElementById(id);
 
+    function n(v) {
+      const x = Number(String(v).replace(",", "."));
+      return Number.isFinite(x) ? x : 0;
+    }
+
+    function money(x, cur) {
+      return `${x.toFixed(2)} ${cur}`;
+    }
+
+    $("btn").addEventListener("click", () => {
+      const cur = $("currency").value;
+
+      const length = n($("length").value);
+      const pricePerM = n($("pricePerM").value);
+
+      const fittingsCount = Math.max(0, Math.floor(n($("fittingsCount").value)));
+      const fittingPrice = n($("fittingPrice").value);
+
+      const hours = n($("hours").value);
+      const rate = n($("rate").value);
+
+      const pipeCost = length * pricePerM;
+      const fittingsCost = fittingsCount * fittingPrice;
+      const laborCost = hours * rate;
+
+      const total = pipeCost + fittingsCost + laborCost;
+
+      const out = $("out");
+      out.style.display = "block";
+
+      let warn = "";
+      if (length > 0 && pricePerM === 0) warn = "⚠️ Pipe price per meter is 0.";
+      if (hours > 0 && rate === 0) warn = "⚠️ Labor rate is 0.";
+
+      out.innerHTML = `
+        <div class="line"><span>Diameter</span><b>${$("diameter").value} mm</b></div>
+        <hr style="border:0;border-top:1px solid #e6eef7;margin:10px 0;">
+        <div class="line"><span>Pipe</span><b>${money(pipeCost, cur)}</b></div>
+        <div class="line"><span>Fittings</span><b>${money(fittingsCost, cur)}</b></div>
+        <div class="line"><span>Labor</span><b>${money(laborCost, cur)}</b></div>
+        <hr style="border:0;border-top:1px solid #cfe6ff;margin:10px 0;">
+        <div class="line total"><span><b>Total</b></span><b>${money(total, cur)}</b></div>
+        ${warn ? `<div class="warn">${warn}</div>` : ``}
+      `;
+    });
+  </script>
 </body>
 </html>
