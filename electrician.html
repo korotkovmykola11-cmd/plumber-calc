@@ -1,9 +1,111 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="ru">
 <head>
-  <title>Electrician Calculator</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Калькулятор электрика</title>
+  <link rel="stylesheet" href="./style.css" />
 </head>
 <body>
-  <h1>Electrician Calculator</h1>
+  <div class="container">
+    <div class="topbar card">
+      <div class="brand">
+        <span>⚡</span>
+        <span>Калькуляторы работ</span>
+      </div>
+      <div class="badge">Версия: Русский · v1</div>
+    </div>
+
+    <div class="hero">
+      <div class="card">
+        <div class="pad">
+          <h1 class="h1">Калькулятор электрика</h1>
+          <p class="p">Быстрый расчёт: материалы + работа по точкам + работа по часам + скидка.</p>
+          <div class="footer">Подсказка: пустые поля считаются как 0.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="pad kpi">
+          <div class="k"><b>Цель:</b> быстро назвать цену клиенту</div>
+          <div class="k"><b>Логика:</b> прозрачно, без “магии”</div>
+          <div class="k"><b>Формат:</b> русский интерфейс</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="pad">
+        <form id="electricForm" onsubmit="return false;">
+          <div class="grid">
+            <div>
+              <label class="label">Валюта</label>
+              <select class="select" id="cur">
+                <option value="AED">AED</option>
+                <option value="USD">USD</option>
+                <option value="EUR">EUR</option>
+              </select>
+              <div class="help">Можно поменять позже. Сейчас главное — качество интерфейса.</div>
+            </div>
+
+            <div>
+              <label class="label">Скидка (%)</label>
+              <input class="input" id="discount" type="number" min="0" max="100" placeholder="например 5">
+            </div>
+
+            <div>
+              <label class="label">Количество точек (розетки/выключатели)</label>
+              <input class="input" id="points" type="number" min="0" placeholder="например 12">
+            </div>
+
+            <div>
+              <label class="label">Цена за точку</label>
+              <input class="input" id="perPoint" type="number" min="0" step="0.01" placeholder="например 35">
+            </div>
+
+            <div>
+              <label class="label">Кабель (метры)</label>
+              <input class="input" id="cableM" type="number" min="0" step="0.1" placeholder="например 40">
+            </div>
+
+            <div>
+              <label class="label">Цена кабеля за метр</label>
+              <input class="input" id="cablePrice" type="number" min="0" step="0.01" placeholder="например 4.5">
+            </div>
+
+            <div>
+              <label class="label">Часы работы</label>
+              <input class="input" id="hours" type="number" min="0" step="0.25" placeholder="например 3.5">
+            </div>
+
+            <div>
+              <label class="label">Ставка за час</label>
+              <input class="input" id="rate" type="number" min="0" step="0.01" placeholder="например 80">
+            </div>
+          </div>
+
+          <div class="btns">
+            <button class="btn primary" onclick="calcElectric()">Рассчитать</button>
+            <button class="btn ghost" onclick="resetForm()">Сброс</button>
+          </div>
+
+          <div class="result">
+            <div class="resline"><span>Материалы</span><b id="r_materials">—</b></div>
+            <div class="resline"><span>Работа (точки + часы)</span><b id="r_work">—</b></div>
+            <div class="resline"><span>Итого до скидки</span><b id="r_subtotal">—</b></div>
+            <div class="resline"><span>К оплате</span><b id="r_total">—</b></div>
+          </div>
+        </form>
+
+        <div class="footer">v1: точки + кабель + часы. Дальше добавим автоматические нормы, шаблоны услуг и печать/смету.</div>
+      </div>
+    </div>
+
+    <div class="footer">© Калькуляторы работ — прототип. Только русский интерфейс.</div>
+  </div>
+
+  <script src="./app.js"></script>
+  <script>calcElectric();</script>
 </body>
 </html>
+
